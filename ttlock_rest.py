@@ -87,5 +87,5 @@ def get_lock(lock):
     return request_lock(lock)
 
 @app.route("/<lock>/getstatus",methods = ['GET'])
-def get_lock(lock):
+def get_lockStatus(lock):
     return request_lockStatus(lock)
