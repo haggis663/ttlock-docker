@@ -21,7 +21,7 @@ curl --location -g --request POST 'https://euapi.ttlock.com/v3/user/register' \
 <br>echo "password" | md5 - md5 hash password
 
 3) Add your new prefixed user to your lock in the TT lock app
-<br>4) Download docker image: <a href="https://hub.docker.com/r/stevendodd/ttlock">https://hub.docker.com/r/stevendodd/ttlock</a>
+<br>4) Download docker image: <a href="https://hub.docker.com/haggis663/ttlock">https://hub.docker.com/r/stevendodd/ttlock</a>
 <br>5) Create a Docker container
 
 ```
