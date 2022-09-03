@@ -41,11 +41,13 @@ docker run \
 ```
 rest:
   - scan_interval: 60
-    resource: http://192.168.1.162:8125/123
+    resource: http://192.168.176.3:5000/1234567
     sensor:
-      - name: "Front Door"
+      - name: "Back Door TTLock"
         value_template: "OK"
+        unique_id: backdoor_ttlock
         json_attributes:
+          - "lockFlagPos"
           - "autoLockTime"
           - "electricQuantity"
           - "firmwareRevision"
@@ -56,8 +58,82 @@ rest:
           - "passageModeAutoUnlock"
           - "soundVolume"
           - "tamperAlert"
+  - scan_interval: 60
+    resource: http://192.168.176.3:5000/7654321
+    sensor:
+      - name: "Inner Door TTLock"
+        value_template: "OK"
+        unique_id: inner_door_ttlock
+        json_attributes:
+          - "lockFlagPos"
+          - "autoLockTime"
+          - "electricQuantity"
+          - "firmwareRevision"
+          - "hardwareRevision"
+          - "lockAlias"
+          - "modelNum"
+          - "passageMode"
+          - "passageModeAutoUnlock"
+          - "soundVolume"
+          - "tamperAlert"
+  - scan_interval: 60
+    resource: http://192.168.176.3:5000/1234567/getstatus
+    sensor:
+      - name: "Back Door Status"
+        value_template: "{{ value_json.state }}"
+        unique_id: backdoor_ttlock_status
+        json_attributes:
+          - "sensorState"
+          - "state"
+  - scan_interval: 60
+    resource: http://192.168.176.3:5000/7654321/getstatus
+    sensor:
+      - name: "Inner Door Status"
+        value_template: "{{ value_json.state }}"
+        unique_id: innerdoor_ttlock_status
+        json_attributes:
+          - "sensorState"
+          - "state"
 rest_command:
-  unlock_door:
-    url: "http://192.168.1.162:8125/123/unlock"
+  unlock_backdoor:
+    url: "http://192.168.176.3:5000/1234567/unlock"
     method: get
+  unlock_innerdoor:
+    url: "http://192.168.176.3:5000/7654321/unlock"
+    method: get
+  lock_backdoor:
+    url: "http://192.168.176.3:5000/1234567/lock"
+    method: get
+  lock_innerdoor:
+    url: "http://192.168.176.3:5000/7654321/lock"
+    method: get
+lock: 
+    - platform: template
+      name: Storeroom Inner Door
+      value_template: "{{ state_attr('sensor.inner_door_status', 'state') | int != 1 }}" #"{{ is_state('sensor.inner_door_status', '0') }}" 
+      lock: 
+      - service: rest_command.lock_innerdoor 
+      unlock: 
+      - service: rest_command.unlock_innerdoor
+    - platform: template
+      name: Storeroom Outer Door
+      value_template: "{{ state_attr('sensor.back_door_status', 'state') | int != 1 }}" 
+      lock: 
+      - service: rest_command.lock_backdoor 
+      unlock: 
+      - service: rest_command.unlock_backdoor 
+sensor:
+  - platform: template
+    sensors:
+      ttlock_innerdoor_battery:
+        friendly_name: "TTLock Inner Door Battery"
+        value_template:  '{{ states.sensor.inner_door_ttlock.attributes.electricQuantity|float }}'
+        unit_of_measurement: '%'
+        device_class: battery
+      ttlock_backdoor_battery:
+        friendly_name: "TTLock Back Door Battery"
+        value_template:  '{{ states.sensor.back_door_ttlock.attributes.electricQuantity|float }}'
+        unit_of_measurement: '%'
+        device_class: battery
+
 ```
